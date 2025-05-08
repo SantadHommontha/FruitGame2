@@ -7,8 +7,8 @@ import time
 WIDTH = 800
 HEIGHT = 600
 running = True
-fruit_size = 50
-ramdom_Fruit = None
+fruit_size = 300
+ramdom_fruit_name = None
 wait_for_spin = False
 # color
 WHITE = (255, 255, 255)
@@ -40,37 +40,44 @@ class Fruit:
 
 # Initialize
 pygame.init()
-screen = pygame.display.set_Mode((WIDTH,HEIGHT))
+screen = pygame.display.set_mode((WIDTH,HEIGHT))
 pygame.display.set_caption("Fruit Game 2")
-clock = pygame.time.clock()
+clock = pygame.time.Clock()
+ser = None
+try:
+    ser = serial.Serial("COM5",115200,timeout=0.1)
+except:
+    print("Not Found Serial ")
 
 
 
 
-
-ser.serial.Serial("COM5",115200,timeout=0.1)
 
 
 def spin_Image():
-    global wait_for_spin ,ramdom_Fruit
+    global wait_for_spin ,ramdom_fruit_name
     wait_for_spin = True
-
+    old_name = None
     for i in range(10):
-        random_name = random.choice(fruit_names)
-        screen.blit(fruit_images[random_name],(WIDTH / 2,HEIGHT / 2))
+        screen.fill(WHITE)
+        while old_name == ramdom_fruit_name:
+            ramdom_fruit_name = random.choice(fruit_names)
+        
+        screen.blit(fruit_images[ramdom_fruit_name],(WIDTH / 2 - fruit_size / 2,HEIGHT / 2 - fruit_size / 2 ))
         pygame.display.flip()
-        time.sleep(0.5)
+        old_name = ramdom_fruit_name
+        time.sleep(0.15)
 
 
 
 
-
+spin_Image()
 while running:
     
     screen.fill(WHITE)
 
 
-    spin_Image()
+    
 
 
 
