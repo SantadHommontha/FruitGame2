@@ -46,6 +46,11 @@ start_tick = 0
 spin_count = 10
 current_spin = 0
 score = 0
+grape_score = 0
+tomato_score = 0
+orange_score = 0
+mistake_score = 0
+
 game_time = 30
 game_timer = TimeCount()
 
@@ -88,6 +93,14 @@ fruit_images_Fix_scale = {
 }
 
 fruit_images = fruit_images_Fix_scale
+
+menu_background = pygame.image.load("bg-startscene.png")
+menu_background = pygame.transform.scale(menu_background,(WIDTH,HEIGHT))
+
+
+# Load play background Image
+back_ground = pygame.image.load("bg-gameplay.png")
+back_ground = pygame.transform.scale(back_ground,(WIDTH,HEIGHT))
 
 #Font
 font_path = "CherryBombOne-Regular.ttf"
@@ -140,7 +153,9 @@ def Input_Test(_event):
     
     
     if game_state == state["M"]:
-        pass
+        if _event.type == pygame.KEYDOWN:
+            if _event.key == pygame.K_g or  _event.key == pygame.K_t or  _event.key == pygame.K_o:
+               Start_State(state["S"])
     
     elif game_state == state["S"]:
         pass
@@ -160,17 +175,29 @@ def Input_Test(_event):
         pass
 
 def Check_Fruit(_key):
-    global score
+    global score,grape_score,tomato_score,orange_score
     if not _key in fruit_map: 
         return
     
-    if ramdom_fruit_name == fruit_map[_key]:
-        score += 1
+    # if ramdom_fruit_name == fruit_map[_key]:
+    #     score += 1
+    #     Start_State(state["C"])
+    # else:
+    #     score -= 1
+    #     Start_State(state["IC"])
+    
+    if ramdom_fruit_name == fruit_map["G"]:
+        grape_score += 1
+        Start_State(state["C"])
+    elif ramdom_fruit_name == fruit_map["T"]:
+        tomato_score += 1
+        Start_State(state["C"])
+    elif ramdom_fruit_name == fruit_map["O"]:
+        orange_score += 1
         Start_State(state["C"])
     else:
-        score -= 1
+        mistake_score += 1
         Start_State(state["IC"])
-
 def Draw_Fruit():
     if ramdom_fruit_name in fruit_names:
         screen.blit(fruit_images[ramdom_fruit_name],(WIDTH / 2 - fruit_size / 2,HEIGHT / 2 - fruit_size / 2 ))
@@ -243,18 +270,43 @@ def Get_Timer():
     return timer
 
 
+# def DisplayScore():
+#     #Grape
+#     score_text = font_small.render(f"Score:{score}",True,BLACK)
+#     score_rect = score_text.get_rect()
+#     score_rect.center = (WIDTH *0.09,HEIGHT * 0.05)
+#     screen.blit(score_text,score_rect)
+
 def DisplayScore():
     #Grape
-    score_text = font_small.render(f"Score:{score}",True,BLACK)
+    score_text = font_small.render(f"{grape_score}",True,BLACK)
     score_rect = score_text.get_rect()
-    score_rect.center = (WIDTH *0.09,HEIGHT * 0.05)
+    score_rect.center = (WIDTH *0.09,HEIGHT * 0.19)
+    screen.blit(score_text,score_rect)
+    
+    #Tomato
+    score_text = font_small.render(f"{tomato_score}",True,BLACK)
+    score_rect = score_text.get_rect()
+    score_rect.center = (WIDTH *0.09,HEIGHT * 0.52)
+    screen.blit(score_text,score_rect)
+    
+    #Orange
+    score_text = font_small.render(f"{orange_score}",True,BLACK)
+    score_rect = score_text.get_rect()
+    score_rect.center = (WIDTH *0.09,HEIGHT * 0.84)
     screen.blit(score_text,score_rect)
 
+
+
+
+
+
 def DiaplayTime():
-    timer_text = font_medium.render(f"Time: {int(game_timer.Get_Timer())}",True,BLACK)
+    timer_text = font_medium.render(f"{int(game_timer.Get_Timer())}",True,BLACK)
     timer_rect = timer_text.get_rect()
-    timer_rect.center = (WIDTH  - 150,50)
+    timer_rect.center = (WIDTH  - 150,80)
     screen.blit(timer_text,timer_rect)
+
 
 
 def GameOver():
@@ -274,13 +326,24 @@ def GameOver():
 
 
 
+def MainMenu():
+    screen.blit(menu_background,(0,0))
+  
+    # gameOver = font_large.render(f"Fruit Game 2",True,WHITE)
+    # text_width, text_height = gameOver.get_size()
+    # screen.blit(gameOver,((WIDTH / 2) - (text_width / 2 ), HEIGHT / 5))
 
+   
+    
+    # gameOver = font_medium.render("Touch Any Fruit To Play ",True,WHITE)
+    # text_width, text_height = gameOver.get_size()
+    # screen.blit(gameOver,((WIDTH / 2) - (text_width / 2 ), HEIGHT / 2))
 
 
 
 
 game_timer.Set_Time(game_time)
-Start_State(state["S"])
+Start_State(state["M"])
 while running:
     
     # pygame Event
@@ -291,6 +354,7 @@ while running:
         Input_Test(event)
 
     if game_state == state["M"]:
+        MainMenu()
         Micro_Bit_Serial()
     
     elif game_state == state["SP"]:
@@ -310,7 +374,7 @@ while running:
             Start_State(state["P"])
         
     elif game_state == state["P"]:
-        screen.fill(WHITE)
+        screen.blit(back_ground,(0,0))
        
         Micro_Bit_Serial()
         Draw_Fruit()
