@@ -1,0 +1,50 @@
+from microbit import *
+
+touch_pin = pin0
+
+
+# Capacitive Mode
+
+def test_capacitive_touch():
+    display.scroll("Capacitive Mode (C)")
+    display.scroll("Touch Pin 0 only")
+    while True:
+       
+        if touch_pin.is_touched():
+            display.show("C")
+        else:
+            display.clear() 
+        sleep(50) 
+
+
+# Resistive Touch
+
+def test_resistive_touch():
+    display.scroll("Resistive Mode (R)")
+    display.scroll("Touch Pin 0 & GND")
+    while True:
+        
+        touch_value = touch_pin.read_analog()
+
+      
+        threshold = 500
+
+        if touch_value < threshold:
+            display.show("R") 
+        else:
+            display.clear()
+        sleep(50)
+
+
+
+# Main Loop
+
+while True:
+    display.scroll("Press A for Capacitive", delay=70)
+    display.scroll("Press B for Resistive", delay=70)
+
+   
+    if button_a.is_pressed():
+        test_capacitive_touch()
+    elif button_b.is_pressed():
+        test_resistive_touch()
