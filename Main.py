@@ -12,15 +12,18 @@ class TimeCount:
     def __init__(self):
         self.elapsed_time = 0
         self.timer = 0
+       
         pass
     def Set_Time(self,_time):
         self.time = _time
         self.timer = _time
+        self.lastTimer = timer
         self.start_tick = pygame.time.get_ticks()
     def Time_Count(self):
         
         self.elapsed_time = (pygame.time.get_ticks() - self.start_tick) / 1000
         self.timer = max(0,self.time - self.elapsed_time)
+        self.lastTime = self.timer;
     def TimeUP(self):
         self.Time_Count()
         if self.timer <= 0:
@@ -240,7 +243,7 @@ def Start_State(_newState):
         spin_count = random.choice([10,13,18])
         
     elif game_state == state["P"]:
-        game_timer.Set_Time(game_timer.Get_Timer())
+        game_timer.Set_Time(game_timer.lastTimer)
         screen.fill(WHITE)
         Draw_Fruit()
     elif game_state == state["G"]:
