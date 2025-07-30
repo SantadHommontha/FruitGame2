@@ -12,18 +12,18 @@ class TimeCount:
     def __init__(self):
         self.elapsed_time = 0
         self.timer = 0
-       
-        pass
+        
+        
     def Set_Time(self,_time):
         self.time = _time
         self.timer = _time
-        self.lastTimer = timer
+        self.lastTimer = self.timer
         self.start_tick = pygame.time.get_ticks()
     def Time_Count(self):
         
         self.elapsed_time = (pygame.time.get_ticks() - self.start_tick) / 1000
         self.timer = max(0,self.time - self.elapsed_time)
-        self.lastTime = self.timer;
+        self.lastTimer = self.timer
     def TimeUP(self):
         self.Time_Count()
         if self.timer <= 0:
@@ -383,6 +383,7 @@ while running:
         Draw_Fruit()
         DisplayScore()
         DiaplayTime()
+        print(game_timer.lastTimer)
         if game_timer.TimeUP():
             Start_State(state["G"])
     elif game_state == state["G"]:
