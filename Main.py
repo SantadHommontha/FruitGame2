@@ -56,10 +56,16 @@ mistake_score = 0
 canClick = True
 is_fullScreen = True
 
-game_time = 30
+game_time = 20
 game_timer = TimeCount() #Timer for gametime
 before_spin_again_timer = TimeCount()
 time_before_spin_again = 3
+
+game_over_for_show_text_timer = TimeCount()
+game_over_for_show_text_time = 1
+
+quick_answers_timer = TimeCount()
+
 # color
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -67,16 +73,17 @@ RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 ORANGE = (255, 165, 0)
 GREEN = (105, 247, 0)
+BROWN = (137,81,41)
 fruit_names = [
-    "Grape",
+    "Apple",
     "Tomato",
-    "Orange"
+    "Pomegranate"
 ]
 
 fruit_map = {
-    "1": "Grape",
+    "1": "Apple",
     "2": "Tomato",
-    "3": "Orange"
+    "3": "Pomegranate"
 }
 state = {
     "M":"MainMenu",
@@ -190,22 +197,22 @@ def Input_Test(_event):
     if game_state == state["M"]:
         if timer.TimeUP():
             if _event.type == pygame.KEYDOWN and canClick:
-                if _event.key == pygame.K_g or  _event.key == pygame.K_t or  _event.key == pygame.K_o:
+                if _event.key == pygame.K_a or  _event.key == pygame.K_t or  _event.key == pygame.K_p:
                     Start_State(state["S"])
     
     elif game_state == state["S"]:
         pass
     elif game_state == state["P"]:
         if _event.type == pygame.KEYDOWN and canClick:
-            if _event.key == pygame.K_g:
+            if _event.key == pygame.K_a:
                 Check_Fruit("1")
             if _event.key == pygame.K_t:
                 Check_Fruit("2")
-            if _event.key == pygame.K_o:
+            if _event.key == pygame.K_p:
                 Check_Fruit("3")
     elif game_state == state["G"]:
         if _event.type == pygame.KEYDOWN and canClick:
-            if _event.key == pygame.K_g or  _event.key == pygame.K_t or  _event.key == pygame.K_o:
+            if _event.key == pygame.K_a or  _event.key == pygame.K_t or  _event.key == pygame.K_p:
                Start_State(state["M"])
            
         pass
@@ -214,22 +221,23 @@ def Check_Fruit(_key):
     global score,grape_score,tomato_score,orange_score,mistake_score
     if not _key in fruit_map: 
         return
-    print("R / K " + str(ramdom_fruit_name) + " " + str(fruit_map[_key]))
+    #print("R / K " + str(ramdom_fruit_name) + " " + str(fruit_map[_key]))
    
     fruit = fruit_map[_key]
     
     if ramdom_fruit_name == fruit:
-        if fruit == fruit_map["1"]:
-             grape_score += 1 
-        elif fruit == fruit_map["2"]:
-             tomato_score += 1
-        elif fruit == fruit_map["3"]:
-             orange_score += 1
+        if quick_answers_timer.TimeUP():
+             score += 1
+        else:
+            score += 2
+       
         Start_State(state["C"])
     else:
-        mistake_score += 1
+        score -= 1
         Start_State(state["IC"])
     Draw_Fruit()
+
+
 def Draw_Fruit():
     if ramdom_fruit_name in fruit_names:
         screen.blit(fruit_images[ramdom_fruit_name],(WIDTH / 2 - fruit_size / 2,HEIGHT / 2 - fruit_size / 2 ))
@@ -254,7 +262,7 @@ def Reset_Time():
 def Start_State(_newState):
     
     global game_state,state_time,current_spin
-    global spin_count,game_timer,timer,show_image_timer
+    global spin_count,game_timer,timer,show_image_timer,game_over_for_show_text_timer
     global tomato_score,orange_score,grape_score,score
     global mistake_score
     global canClick
@@ -272,21 +280,29 @@ def Start_State(_newState):
         mistake_score = 0
         current_spin = 0
         game_timer.Set_Time(game_time)
+        canClick = False
         Reset_Time()
         score = 0
         Start_State(state["SP"])
     elif game_state == state["SP"]:
         current_spin = 0
-        spin_count = random.choice([10,13,18])
+        spin_count = random.choice([9,12,15])
+        canClick = False
         
     elif game_state == state["P"]:
         canClick = True
         game_timer.Set_Time(game_timer.lastTimer)
-        before_spin_again_timer.Set_Time(time_before_spin_again)
+        time_before = time_before_spin_again
+        if game_timer.Get_Timer() <= game_time / 2:
+            time_before = time_before_spin_again / 2
+        before_spin_again_timer.Set_Time(time_before)
         screen.fill(WHITE)
+
+        quick_answers_timer.Set_Time(1)
         Draw_Fruit()
     elif game_state == state["G"]:
         canClick = False
+        game_over_for_show_text_timer.Set_Time(game_over_for_show_text_time)
         timer.Set_Time(1)
     elif game_state == state["C"]:
         canClick = False
@@ -323,57 +339,77 @@ def Get_Timer():
 
 def DisplayScore():
     
-    #Grape
-    score_text = font_small.render(f"{grape_score}",True,BLACK)
-    score_rect = score_text.get_rect()
-    score_rect.center = (WIDTH *0.09,HEIGHT * 0.19)
-    screen.blit(score_text,score_rect)
+    # #Grape
+    # score_text = font_small.render(f"{grape_score}",True,BLACK)
+    # score_rect = score_text.get_rect()
+    # score_rect.center = (WIDTH *0.09,HEIGHT * 0.19)
+    # screen.blit(score_text,score_rect)
     
-    #Tomato
-    score_text = font_small.render(f"{tomato_score}",True,BLACK)
-    score_rect = score_text.get_rect()
-    score_rect.center = (WIDTH *0.09,HEIGHT * 0.52)
-    screen.blit(score_text,score_rect)
+    # #Tomato
+    # score_text = font_small.render(f"{tomato_score}",True,BLACK)
+    # score_rect = score_text.get_rect()
+    # score_rect.center = (WIDTH *0.09,HEIGHT * 0.52)
+    # screen.blit(score_text,score_rect)
     
+    # #Orange
+    # score_text = font_small.render(f"{orange_score}",True,BLACK)
+    # score_rect = score_text.get_rect()
+    # score_rect.center = (WIDTH *0.09,HEIGHT * 0.84)
+    # screen.blit(score_text,score_rect)
+
+
     #Orange
-    score_text = font_small.render(f"{orange_score}",True,BLACK)
+    pygame.draw.rect(screen,BROWN,((WIDTH *0.09 ) - 90  ,(HEIGHT * 0.1) - 30,180,80),border_radius=25)
+
+    score_text = font_small.render(f"Score: {score}",True,YELLOW)
     score_rect = score_text.get_rect()
-    score_rect.center = (WIDTH *0.09,HEIGHT * 0.84)
+    score_rect.center =(WIDTH *0.09,HEIGHT * 0.1)
     screen.blit(score_text,score_rect)
-
-
-
 
 
 
 def DiaplayTime():
-    timer_text = font_medium.render(f"{int(game_timer.Get_Timer())}",True,BLACK)
+
+    box = pygame.draw.rect(screen,BROWN,((WIDTH - WIDTH  * 0.11 ) - 75  ,(HEIGHT * 0.1) - 30,150,80),border_radius=25)
+
+    timer_text = font_medium.render(f"{int(game_timer.Get_Timer())}",True,YELLOW)
     timer_rect = timer_text.get_rect()
-    timer_rect.center = (WIDTH  - 150,80)
+    timer_rect.center = (WIDTH - WIDTH  * 0.11,  (HEIGHT * 0.1) )
     screen.blit(timer_text,timer_rect)
 
 
 
 def GameOver():
-    screen.fill(BLACK)
-  
-    gameOver = font_large.render(f"Game Over",True,WHITE)
+    screen.blit(back_ground,(0,0))
+    
+    backGround_W = WIDTH * 0.8
+    backGround_H = HEIGHT * 0.8
+    pygame.draw.rect(screen,BROWN,(WIDTH / 2  - backGround_W / 2 ,HEIGHT / 2 - backGround_H / 2,backGround_W,backGround_H),border_radius=25)
+
+    gameOver = font_large.render(f"Game over.",True,YELLOW)
     text_width, text_height = gameOver.get_size()
     screen.blit(gameOver,((WIDTH / 2) - (text_width / 2 ), HEIGHT / 5))
 
-    gameOver = font_medium.render(f"Score Sum: {(grape_score + tomato_score + orange_score) - mistake_score}",True,WHITE)
+    gameOver = font_medium.render(f"Score : {score}",True,YELLOW)
     text_width, text_height = gameOver.get_size()
     screen.blit(gameOver,((WIDTH / 2) - (text_width / 2 ), HEIGHT / 3))
     
-    gameOver = font_medium.render("Touch Any Fruit To Main Menu",True,WHITE)
-    text_width, text_height = gameOver.get_size()
-    screen.blit(gameOver,((WIDTH / 2) - (text_width / 2 ), HEIGHT / 2))
+    if game_over_for_show_text_timer.TimeUP():
+        gameOver = font_medium.render("Touch any button to main menu.",True,YELLOW)
+        text_width, text_height = gameOver.get_size()
+        screen.blit(gameOver,((WIDTH / 2) - (text_width / 2 ), HEIGHT / 2))
 
 
 
 def MainMenu():
     screen.blit(menu_background,(0,0))
   
+
+    if timer.TimeUP():
+         timer_text = font_medium.render(f"Touch Any Button To Play",True,YELLOW)
+         timer_rect = timer_text.get_rect()
+         timer_rect.center = (WIDTH /2, HEIGHT - (HEIGHT * 0.07) )
+         screen.blit(timer_text,timer_rect)
     # gameOver = font_large.render(f"Fruit Game 2",True,WHITE)
     # text_width, text_height = gameOver.get_size()
     # screen.blit(gameOver,((WIDTH / 2) - (text_width / 2 ), HEIGHT / 5))
