@@ -56,7 +56,7 @@ mistake_score = 0
 canClick = True
 is_fullScreen = True
 
-game_time = 20
+game_time = 30
 game_timer = TimeCount() #Timer for gametime
 before_spin_again_timer = TimeCount()
 time_before_spin_again = 3
@@ -167,26 +167,6 @@ def Micro_Bit_Serial():
                 print(command)
                 if command in fruit_map:
                    Start_State(state["S"])
-    # 
-    # if game_state == state["M"]:
-    #      if ser.in_waiting > 0 and canClick:
-    #         command = ser.readline().decode().strip()
-    #         print(ser.readline().decode().strip())
-    #         if command in fruit_map:
-    #             Start_State(state["S"])
-    # elif game_state == state["P"]:
-    #     if ser.in_waiting > 0 and canClick:
-    #         command = ser.readline().decode().strip()
-    #         print(command)
-    #         Check_Fruit(command)
-    # elif game_state == state["G"]:
-    #     if ser.in_waiting > 0 and canClick:
-    #         command = ser.readline().decode().strip()
-    #         if command in fruit_map:
-    #              Start_State(state["S"])
-    
-
-
 
 
 
@@ -221,7 +201,6 @@ def Check_Fruit(_key):
     global score,grape_score,tomato_score,orange_score,mistake_score
     if not _key in fruit_map: 
         return
-    #print("R / K " + str(ramdom_fruit_name) + " " + str(fruit_map[_key]))
    
     fruit = fruit_map[_key]
     
@@ -325,40 +304,12 @@ def Set_Timer(_time):
 def Get_Timer():
     global elapsed_time,timer
     
-
-
     return timer
 
 
-# def DisplayScore():
-#     #Grape
-#     score_text = font_small.render(f"Score:{score}",True,BLACK)
-#     score_rect = score_text.get_rect()
-#     score_rect.center = (WIDTH *0.09,HEIGHT * 0.05)
-#     screen.blit(score_text,score_rect)
 
 def DisplayScore():
     
-    # #Grape
-    # score_text = font_small.render(f"{grape_score}",True,BLACK)
-    # score_rect = score_text.get_rect()
-    # score_rect.center = (WIDTH *0.09,HEIGHT * 0.19)
-    # screen.blit(score_text,score_rect)
-    
-    # #Tomato
-    # score_text = font_small.render(f"{tomato_score}",True,BLACK)
-    # score_rect = score_text.get_rect()
-    # score_rect.center = (WIDTH *0.09,HEIGHT * 0.52)
-    # screen.blit(score_text,score_rect)
-    
-    # #Orange
-    # score_text = font_small.render(f"{orange_score}",True,BLACK)
-    # score_rect = score_text.get_rect()
-    # score_rect.center = (WIDTH *0.09,HEIGHT * 0.84)
-    # screen.blit(score_text,score_rect)
-
-
-    #Orange
     pygame.draw.rect(screen,BROWN,((WIDTH *0.09 ) - 90  ,(HEIGHT * 0.1) - 30,180,80),border_radius=25)
 
     score_text = font_small.render(f"Score: {score}",True,YELLOW)
@@ -403,22 +354,13 @@ def GameOver():
 
 def MainMenu():
     screen.blit(menu_background,(0,0))
-  
 
     if timer.TimeUP():
          timer_text = font_medium.render(f"Touch Any Button To Play",True,YELLOW)
          timer_rect = timer_text.get_rect()
          timer_rect.center = (WIDTH /2, HEIGHT - (HEIGHT * 0.07) )
          screen.blit(timer_text,timer_rect)
-    # gameOver = font_large.render(f"Fruit Game 2",True,WHITE)
-    # text_width, text_height = gameOver.get_size()
-    # screen.blit(gameOver,((WIDTH / 2) - (text_width / 2 ), HEIGHT / 5))
 
-   
-    
-    # gameOver = font_medium.render("Touch Any Fruit To Play ",True,WHITE)
-    # text_width, text_height = gameOver.get_size()
-    # screen.blit(gameOver,((WIDTH / 2) - (text_width / 2 ), HEIGHT / 2))
 
 def Toggle_FullScreen():
     global is_fullScreen,screen
@@ -454,7 +396,7 @@ while running:
         if current_spin < spin_count and not wait_for_spin:
             Random_Fruit()
             current_spin += 1
-            #Set_Timer(0.05)
+          
             timer.Set_Time(0.05)
             wait_for_spin = True
         Draw_Fruit()
@@ -471,9 +413,7 @@ while running:
         Draw_Fruit()
         DisplayScore()
         DiaplayTime()
-        #print("G " + str(grape_score))
-        #print("T " + str(tomato_score))
-        #print("O " + str(orange_score))
+    
         if before_spin_again_timer.TimeUP():
            Start_State(state["SP"])
         
