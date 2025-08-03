@@ -33,6 +33,8 @@ class TimeCount:
     def Get_Timer(self):
         self.Time_Count()
         return self.timer
+    def GetCurrentTime(self):
+        return self.timer
 
 
 # Variables
@@ -172,7 +174,12 @@ def Micro_Bit_Serial():
 
 
 def Input_Test(_event):
-    
+    global running
+    if _event.type == pygame.KEYDOWN:
+        if _event.key == pygame.K_f:
+            Toggle_FullScreen()
+        if _event.key == pygame.K_ESCAPE:
+            running = False
     
     if game_state == state["M"]:
         if timer.TimeUP():
@@ -391,7 +398,9 @@ while running:
             Micro_Bit_Serial()
     
     elif game_state == state["SP"]:
-        
+        if game_timer.GetCurrentTime() <= 0:
+            Start_State(state["G"])
+            continue
         screen.fill(YELLOW)
         if current_spin < spin_count and not wait_for_spin:
             Random_Fruit()
@@ -414,12 +423,15 @@ while running:
         DisplayScore()
         DiaplayTime()
     
-        if before_spin_again_timer.TimeUP():
-           Start_State(state["SP"])
+      
         
              
         if game_timer.TimeUP():
             Start_State(state["G"])
+
+
+        if before_spin_again_timer.TimeUP():
+           Start_State(state["SP"])
     elif game_state == state["G"]:
         GameOver()
         if timer.TimeUP():
