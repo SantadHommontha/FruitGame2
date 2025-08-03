@@ -1,0 +1,57 @@
+from microbit import *
+
+uart.init(115200)
+
+pin0_is_Touch = False
+pin1_is_Touch = False
+pin2_is_Touch = False
+
+while True:
+    # read pin
+    p0 = pin0.is_touched()
+    p1 = pin1.is_touched()
+    p2 = pin2.is_touched()
+
+    # pin 0 + 1
+    if p0 and p1 and not (pin0_is_Touch or pin1_is_Touch):
+        display.show("5")
+        uart.write("5")
+        pin0_is_Touch = True
+        pin1_is_Touch = True
+
+    # pin 1 + 2
+    elif p1 and p2 and not (pin1_is_Touch or pin2_is_Touch):
+        display.show("6")
+        uart.write("6")
+        pin1_is_Touch = True
+        pin2_is_Touch = True
+
+    # pin0
+    elif p0 and not pin0_is_Touch:
+        display.show("1")
+        uart.write("1")
+        pin0_is_Touch = True
+
+    # pin1
+    elif p1 and not pin1_is_Touch:
+        display.show("2")
+        uart.write("2")
+        pin1_is_Touch = True
+
+    # pin2
+    elif p2 and not pin2_is_Touch:
+        display.show("3")
+        uart.write("3")
+        pin2_is_Touch = True
+
+    # reset 
+    if not p0 and pin0_is_Touch:
+        pin0_is_Touch = False
+
+    if not p1 and pin1_is_Touch:
+        pin1_is_Touch = False
+
+    if not p2 and pin2_is_Touch:
+        pin2_is_Touch = False
+
+    sleep(100)

@@ -54,10 +54,12 @@ tomato_score = 0
 orange_score = 0
 mistake_score = 0
 canClick = True
+is_fullScreen = True
 
 game_time = 30
 game_timer = TimeCount() #Timer for gametime
-
+before_spin_again_timer = TimeCount()
+time_before_spin_again = 3
 # color
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -122,8 +124,9 @@ clock = pygame.time.Clock()
 
 ser = None
 try:
-    ser = serial.Serial("COM5",115200,timeout=0.1) # Windows
-    #ser = serial.Serial("/dev/ttyAPE0",baudrate=115200,timeout=0.1) # raspberry pi
+    #ser = serial.Serial("COM5",115200,timeout=0.1) # Windows
+    ser = serial.Serial("/dev/ttyACM0",baudrate=115200,timeout=0.1) # raspberry pi
+    print("Found Micro:Bit")
 except:
     print("Not Found Serial ")
 
@@ -131,22 +134,50 @@ except:
 
 
 def Micro_Bit_Serial():
+    global running
     if not ser : return
-    if game_state == state["M"]:
-         if ser.in_waiting > 0 and canClick:
-            command = ser.readline().decode().strip()
-            if command in fruit_map:
-                Start_State(state["S"])
-    elif game_state == state["P"]:
-        if ser.in_waiting > 0 and canClick:
-            command = ser.readline().decode().strip()
-            print(command)
-            Check_Fruit(command)
-    elif game_state == state["G"]:
-        if ser.in_waiting > 0 and canClick:
-            command = ser.readline().decode().strip()
-            if command in fruit_map:
-                 Start_State(state["S"])
+    
+    if ser.in_waiting > 0 :
+        command = ser.readline().decode().strip()
+        
+        
+        if command == "5":
+            Toggle_FullScreen()
+        elif command == "6":
+            running = False
+    
+        if game_state == state["M"]:
+            if  canClick:
+                print(command)
+                if command in fruit_map:
+                    Start_State(state["S"])
+        elif game_state == state["P"]:
+            if  canClick:
+                print(command)
+                Check_Fruit(command)
+        elif game_state == state["G"]:
+            if  canClick:
+                print(command)
+                if command in fruit_map:
+                   Start_State(state["S"])
+    # 
+    # if game_state == state["M"]:
+    #      if ser.in_waiting > 0 and canClick:
+    #         command = ser.readline().decode().strip()
+    #         print(ser.readline().decode().strip())
+    #         if command in fruit_map:
+    #             Start_State(state["S"])
+    # elif game_state == state["P"]:
+    #     if ser.in_waiting > 0 and canClick:
+    #         command = ser.readline().decode().strip()
+    #         print(command)
+    #         Check_Fruit(command)
+    # elif game_state == state["G"]:
+    #     if ser.in_waiting > 0 and canClick:
+    #         command = ser.readline().decode().strip()
+    #         if command in fruit_map:
+    #              Start_State(state["S"])
+    
 
 
 
@@ -183,24 +214,22 @@ def Check_Fruit(_key):
     global score,grape_score,tomato_score,orange_score,mistake_score
     if not _key in fruit_map: 
         return
-    
+    print("R / K " + str(ramdom_fruit_name) + " " + str(fruit_map[_key]))
    
     fruit = fruit_map[_key]
+    
     if ramdom_fruit_name == fruit:
-        grape_score += 1
+        if fruit == fruit_map["1"]:
+             grape_score += 1 
+        elif fruit == fruit_map["2"]:
+             tomato_score += 1
+        elif fruit == fruit_map["3"]:
+             orange_score += 1
         Start_State(state["C"])
-        print("1")
-    elif ramdom_fruit_name == fruit:
-        tomato_score += 1
-        Start_State(state["C"])
-        print("2")
-    elif ramdom_fruit_name == fruit:
-        orange_score += 1
-        Start_State(state["C"])
-        print("3")
     else:
         mistake_score += 1
         Start_State(state["IC"])
+    Draw_Fruit()
 def Draw_Fruit():
     if ramdom_fruit_name in fruit_names:
         screen.blit(fruit_images[ramdom_fruit_name],(WIDTH / 2 - fruit_size / 2,HEIGHT / 2 - fruit_size / 2 ))
@@ -225,15 +254,15 @@ def Reset_Time():
 def Start_State(_newState):
     
     global game_state,state_time,current_spin
-    global spin_count,game_timer,timer,score
-    global tomato_score,orange_score,grape_score;
+    global spin_count,game_timer,timer,show_image_timer
+    global tomato_score,orange_score,grape_score,score
     global mistake_score
     global canClick
     game_state = _newState
     print("Ner State " + _newState);
     if game_state == state["M"]:
         timer.Set_Time(1)
-        canClick = False
+        canClick = True
         pass
     elif game_state == state["S"]:
         grape_score = 0
@@ -253,6 +282,7 @@ def Start_State(_newState):
     elif game_state == state["P"]:
         canClick = True
         game_timer.Set_Time(game_timer.lastTimer)
+        before_spin_again_timer.Set_Time(time_before_spin_again)
         screen.fill(WHITE)
         Draw_Fruit()
     elif game_state == state["G"]:
@@ -292,6 +322,7 @@ def Get_Timer():
 #     screen.blit(score_text,score_rect)
 
 def DisplayScore():
+    
     #Grape
     score_text = font_small.render(f"{grape_score}",True,BLACK)
     score_rect = score_text.get_rect()
@@ -353,7 +384,15 @@ def MainMenu():
     # text_width, text_height = gameOver.get_size()
     # screen.blit(gameOver,((WIDTH / 2) - (text_width / 2 ), HEIGHT / 2))
 
+def Toggle_FullScreen():
+    global is_fullScreen,screen
+    
+    if is_fullScreen:
+        screen = pygame.display.set_mode((WIDTH,HEIGHT),pygame.FULLSCREEN)
+    else:
+        screen = pygame.display.set_mode((WIDTH,HEIGHT))
 
+    is_fullScreen = not is_fullScreen
 
 
 game_timer.Set_Time(game_time)
@@ -396,7 +435,13 @@ while running:
         Draw_Fruit()
         DisplayScore()
         DiaplayTime()
-      
+        #print("G " + str(grape_score))
+        #print("T " + str(tomato_score))
+        #print("O " + str(orange_score))
+        if before_spin_again_timer.TimeUP():
+           Start_State(state["SP"])
+        
+             
         if game_timer.TimeUP():
             Start_State(state["G"])
     elif game_state == state["G"]:
